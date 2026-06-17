@@ -11,10 +11,23 @@ Apple Silicon, Apple Intelligence enabled.
 
 ## Install
 
+### Homebrew (recommended)
+
+    brew install drewmccormack/slop/slop
+
+Then add the wrapper to your shell (Homebrew prints this in its caveats too):
+
+    echo 'source "$(brew --prefix)/share/slop/slop.sh"' >> ~/.zshrc   # or ~/.bashrc
+
+Open a new shell. The formula builds from source, so you need the Xcode Command
+Line Tools (`xcode-select --install`).
+
+### From a clone
+
     ./install.sh
 
-Open a new shell. (Installs a `slop-bin` binary to `~/.local/bin` and a `slop`
-shell function into your `.zshrc` and `.bashrc` when present.)
+Builds the release binary, installs `slop-bin` to `~/.local/bin`, and adds a
+`source` line to your `.zshrc` and `.bashrc` when present.
 
 ## Use
 
