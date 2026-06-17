@@ -2,37 +2,34 @@
 
 > **AI slop comes to the command line.**
 >
-> Finally, glorious machine-generated mush, right there in your terminal. Except
-> here's the twist nobody saw coming: the slop fixes *your* slop. It's slop all
-> the way down, and somehow, against God and good taste, your files end up in the
-> right place.
+> History's first machine-generated mush that fixes the mush you generated first.
 
-We live in the age of slop. AI slop in your feed. AI slop in your inbox. AI slop
-generating the corporate apology for the last batch of AI slop. So we asked the
-only question left worth asking: what if the slop... helped?
+It was always going to end up in the terminal. AI slop took the art, then the
+prose, then the corporate apology for the last batch of AI slop, and the shell
+prompt was the obvious next thing to colonise. The twist is that this particular
+slop is pointed the other way: it cleans up after you.
 
-`slop` is an LLM bolted onto your shell. You fling a half-remembered command at
-it, or some words, or a vague feeling, and it sobers up your nonsense into actual
-unix and runs it. The machine is sloppy. You are sloppy. Two wrongs, one
-suspiciously-working `cp`:
+`slop` is an on-device language model wedged between you and your shell. You hand
+it a command you half-remember, or a sentence, or the general direction of a
+command, and it quietly works out what you meant and runs it:
 
-    slop cp *.m dir/                  # the command you ALMOST remember; it repairs it
-    slop copy the m files into dir    # or just gesture at it in English
+    slop cp *.m dir/                  # the command you almost remember
+    slop copy the m files into dir    # the sentence you'd rather type
     slop cd to the lip reading project
 
-The best part: it all runs on Apple's on-device model. Your fumbling never leaves
-the building. Your colleagues will never, ever learn that you cannot awk your way
-out of a wet paper bag. Your secret incompetence is now end-to-end encrypted by
-sheer locality. You're welcome.
+It runs entirely on Apple's on-device model, which means none of this reaches the
+network, your employer, or the permanent record. Whatever you cannot remember
+about `tar` stays between you and a neural network that has, mercifully, no
+opinions and no memory.
 
-Safe stuff just runs. Anything that could actually hurt you — `rm`, overwrites,
-`sudo`, the works — slams the brakes, shows you the command and an English
-description, and makes you say yes. The slop has standards. Low ones, but
-standards.
+Most things just run. Anything that could ruin your afternoon — `rm`, an
+overwrite, `sudo`, that whole family — stops, shows you the command and a sentence
+of plain English, and waits for you to agree to it. The slop has standards. Low
+ones, but standards.
 
-100% on-device. No API keys, no network, no telemetry, no "we value your
-privacy" modal. Nothing leaves your Mac except the commands you were going to run
-anyway. Requires macOS 26+, Apple Silicon, and Apple Intelligence switched on.
+Entirely on-device. No API keys, no network, no telemetry, no modal explaining
+how much it values your privacy. Nothing leaves your Mac that wasn't going to
+leave anyway. Requires macOS 26+, Apple Silicon, and Apple Intelligence turned on.
 
 ## Get the slop into your machine
 
