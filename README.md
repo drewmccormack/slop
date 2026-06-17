@@ -1,104 +1,126 @@
 # slop
 
-> **Sloppy. Crappy unix commands that work.**
+> **AI slop comes to the command line.**
+>
+> Finally, glorious machine-generated mush, right there in your terminal. Except
+> here's the twist nobody saw coming: the slop fixes *your* slop. It's slop all
+> the way down, and somehow, against God and good taste, your files end up in the
+> right place.
 
-Can't remember the damn command? Git's got your tongue? Just get sloppy. `slop`
-works with all your half-assed attempts at unix, and if it's all too much, just
-revert to English. Or any other language, for that matter.
+We live in the age of slop. AI slop in your feed. AI slop in your inbox. AI slop
+generating the corporate apology for the last batch of AI slop. So we asked the
+only question left worth asking: what if the slop... helped?
 
-You type the gist; `slop` figures out what you meant, fixes it up, and runs it.
-It uses Apple's on-device model, so your fumbling stays completely private. Your
-colleagues will never see that you can't awk your way out of a paper bag:
+`slop` is an LLM bolted onto your shell. You fling a half-remembered command at
+it, or some words, or a vague feeling, and it sobers up your nonsense into actual
+unix and runs it. The machine is sloppy. You are sloppy. Two wrongs, one
+suspiciously-working `cp`:
 
-    slop cp *.m dir/                  # half-remembered command; it repairs it
-    slop copy the m files into dir    # ...or just say it in English
+    slop cp *.m dir/                  # the command you ALMOST remember; it repairs it
+    slop copy the m files into dir    # or just gesture at it in English
     slop cd to the lip reading project
 
-Safe stuff just runs. Anything that could bite (delete, overwrite, `sudo`)
-stops and shows you the command plus a plain-English description first.
+The best part: it all runs on Apple's on-device model. Your fumbling never leaves
+the building. Your colleagues will never, ever learn that you cannot awk your way
+out of a wet paper bag. Your secret incompetence is now end-to-end encrypted by
+sheer locality. You're welcome.
 
-100% on-device. No API keys, no network, nothing leaves your Mac. Requires
-macOS 26+, Apple Silicon, and Apple Intelligence enabled.
+Safe stuff just runs. Anything that could actually hurt you — `rm`, overwrites,
+`sudo`, the works — slams the brakes, shows you the command and an English
+description, and makes you say yes. The slop has standards. Low ones, but
+standards.
 
-## Install
+100% on-device. No API keys, no network, no telemetry, no "we value your
+privacy" modal. Nothing leaves your Mac except the commands you were going to run
+anyway. Requires macOS 26+, Apple Silicon, and Apple Intelligence switched on.
 
-### Homebrew (recommended)
+## Get the slop into your machine
+
+### Homebrew (the civilised way)
 
     brew install drewmccormack/slop/slop
 
-Then add the wrapper to your shell (Homebrew prints this in its caveats too):
+Then bless your shell with the wrapper (Homebrew nags you about this too):
 
     echo 'source "$(brew --prefix)/share/slop/slop.sh"' >> ~/.zshrc   # or ~/.bashrc
 
-Open a new shell. The formula builds from source, so you need the Xcode Command
-Line Tools (`xcode-select --install`).
+Open a new shell. It builds from source like a real artisanal slop, so you'll
+need the Xcode Command Line Tools (`xcode-select --install`).
 
-### From a clone
+### From a clone (for the brave / the offline)
 
     ./install.sh
 
-Builds the release binary, installs `slop-bin` to `~/.local/bin`, and adds a
-`source` line to your `.zshrc` and `.bashrc` when present.
+Builds the release binary, drops `slop-bin` into `~/.local/bin`, and slips a
+`source` line into your `.zshrc` and `.bashrc` while you're not looking.
 
-## Use
+## Sloppin' around
 
-When `slop` runs a command outright, it echoes it dim first (e.g. `$ ls`) so
-you see what happened. When it's unsure — or the command could bite — it shows
-you the command and a plain-English description and waits at `[Y/n/e]`:
+When `slop` is feeling sure of itself, it just runs the thing, echoing the
+command dim first (e.g. `$ ls`) so you can nod sagely as if you'd have typed
+that. When it's unsure, or the command could draw blood, it stops, shows you the
+command and a plain-English description, and waits at `[Y/n/e]`:
 
-- **Y** / Enter — run it
-- **n** — cancel
-- **e** — edit the command, then run what you save
+- **Y** / Enter — do it, you magnificent coward
+- **n** — abort, pretend this never happened
+- **e** — edit the command first, then run what you save
 
-Anything that deletes, overwrites, moves, force-pushes, or needs `sudo` always
-proposes — it is never auto-run, no matter how confident it is.
+Anything that deletes, overwrites, moves, force-pushes, or needs `sudo` *always*
+asks first, no matter how confident the slop feels. The slop is sloppy, not
+homicidal.
 
-### Quoting
+### When to use quotes (a brief, grudging dose of reality)
 
-Unquoted works for globs and plain English. Whenever your command contains a
-pipe, redirect, or `&&`, quote it — that always works:
+The slop is powerful but it is not a wizard, and your shell gets first crack at
+your typing. Bare globs and plain English are fine. But the moment you reach for
+a pipe, a redirect, or `&&`, wrap the whole thing in quotes or the shell will eat
+it before `slop` smells it:
 
     slop 'wc -l *.swift | tail -1'
 
-This is because the shell parses pipes and redirects as grammar before `slop`
-ever sees them; quoting passes the whole line through verbatim.
+Why: your shell parses `|` and `>` as grammar before `slop` exists. Quotes hand
+the line over untouched. Blame Ken Thompson, not us.
 
-### Glob behavior
+### Globs, specifically
 
-- **zsh**: unquoted globs survive — the `slop` alias applies `noglob` at the
-  call site, so `slop cp *.m dir/` reaches the binary with `*.m` intact.
-- **bash**: unquoted globs are expanded by bash before slop runs; **quote**
-  commands containing globs in bash, e.g. `slop 'cp *.m dir/'`.
-- **Both shells**: pipes and redirects always require quoting (see above).
+- **zsh**: bare globs survive. The `slop` alias slaps `noglob` on at the call
+  site, so `slop cp *.m dir/` reaches the binary with `*.m` gloriously intact.
+- **bash**: bash expands globs before slop wakes up, so **quote** them:
+  `slop 'cp *.m dir/'`. (bash has no call-site `noglob`. Take it up with bash.)
+- **Both**: pipes and redirects always want quotes. See above. We warned you.
 
-`cd` and `export` take effect in your live shell: the binary writes the command
-to a temp file (`SLOP_EVAL_FILE`) and the shell wrapper `eval`s it in the
-current session. Verified working in both zsh and bash. (Because model output
-is non-deterministic, a borderline `cd` request is occasionally proposed rather
-than auto-run; just press Enter to confirm.)
+`cd` and `export` actually move your real shell — the binary writes the command
+to a temp file (`SLOP_EVAL_FILE`) and the wrapper `eval`s it in your live
+session, because a child process changing its parent's directory is otherwise
+one of those things unix simply refuses to let you have. Works in zsh and bash.
+(The model is non-deterministic, so a borderline `cd` is occasionally proposed
+instead of auto-run. Just hit Enter and move on with your life.)
 
-## How it works
+## How the sausage is slopped
+
+For the morbidly curious who want to know what's running their `rm`:
 
 1. The shell wrapper (`shell/slop.sh`) runs `slop-bin` with stdin/stdout/stderr
-   all going straight to the terminal — nothing is captured.
-2. `slop-bin` checks the on-device model is available, then asks it to either
-   repair a sloppy command or translate English, returning a structured result:
-   `{ command, explanation, confidence, isDestructive }`.
-3. A pure decision rule picks the action: **run** iff `confidence == high && !isDestructive`,
-   otherwise **propose**.
-4. Non-`cd`/`export` commands run via `$SHELL -c` with output streamed straight
-   to your terminal. `cd`/`export` are written to a temp file (`SLOP_EVAL_FILE`)
-   which the wrapper `eval`s in your live shell. When run standalone (no wrapper),
-   the binary falls back to a `__SLOP_EVAL__` sentinel on stdout.
+   going straight to your terminal. Nothing is captured, nothing is hidden.
+2. `slop-bin` confirms the on-device model is awake, then hands it your input and
+   asks it to either repair a sloppy command or translate your English, returning
+   a tidy little verdict: `{ command, explanation, confidence, isDestructive }`.
+3. A dumb, honest rule decides what happens: **run** if `confidence == high && !isDestructive`,
+   otherwise **propose** and let you be the adult.
+4. Ordinary commands run via `$SHELL -c` with output streamed straight to you.
+   `cd`/`export` go through the temp-file (`SLOP_EVAL_FILE`) ritual described
+   above. Run it standalone with no wrapper and it falls back to a `__SLOP_EVAL__`
+   sentinel on stdout, for the three people who will ever do that.
 
-All prompts and echoes go to stderr.
+All prompts and echoes go to stderr, so piping still behaves.
 
-## Development
+## Development (yes, there are actually tests)
 
     swift build          # debug build
-    swift test           # run the unit tests
+    swift test           # 21 of them, and they pass, thank you very much
     swift build -c release
 
-Unit tests cover the decision logic, `cd`/`export` detection, prompt/context
-assembly, the executor, and the wrapper file contents. The live model path is
-verified by manual smoke tests (see `docs/superpowers/plans/`).
+Tests cover the decision logic, `cd`/`export` detection, prompt/context
+assembly, the executor, and the wrapper file contents. The live-model path is
+verified by manual smoke tests, because mocking a neural network to assert it
+returns `ls` is a special kind of madness. See `docs/superpowers/plans/`.
