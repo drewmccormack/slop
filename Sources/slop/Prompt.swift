@@ -19,6 +19,17 @@ shutdown/reboot/kill. When in doubt, set isDestructive to true — a needless co
 is harmless, a missed one is not. For "force push", the correct command is \
 `git push --force` and it is destructive.
 
+Be decisive: for an ordinary, unambiguous command (listing, viewing, navigating, \
+searching, creating), set confidence to high. Reserve medium or low for genuinely \
+ambiguous input. Marking a command destructive does NOT lower its confidence.
+
+Examples:
+- "show me the readme" → command `cat readme.txt`, confidence high, isDestructive false.
+- "go to the build folder" → command `cd build`, confidence high, isDestructive false.
+- "cp *.txt backup/" → command `cp *.txt backup/`, confidence high, isDestructive false.
+- "nuke this whole folder" → command `rm -rf .`, confidence high, isDestructive true.
+- "force push to main" → command `git push --force`, confidence high, isDestructive true.
+
 Return only the structured result.
 """
 
