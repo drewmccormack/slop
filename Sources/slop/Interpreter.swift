@@ -11,7 +11,17 @@ enum SlopError: Error, CustomStringConvertible {
     }
 }
 
-func interpret(input: String) async throws -> SloppyCommand {
+/// Dispatch to the chosen backend.
+func interpret(input: String, backend: Backend) async throws -> SloppyCommand {
+    switch backend {
+    case .apple:
+        return try await interpretWithApple(input: input)
+    case .openai(let apiKey):
+        return try await interpretWithOpenAI(input: input, apiKey: apiKey)
+    }
+}
+
+func interpretWithApple(input: String) async throws -> SloppyCommand {
     let model = SystemLanguageModel.default
     switch model.availability {
     case .available:

@@ -25,8 +25,28 @@ func emitEval(_ command: String) {
     }
 }
 
+// Pick the backend. The --llm flag is a one-shot override and never writes the
+// stored default; only the first-time interactive prompt persists consent.
+let backend = selectBackend(
+    llm: options.llm,
+    apiKey: ProcessInfo.processInfo.environment["OPENAI_API_KEY"],
+    storedConsent: readStoredConsent(),
+    askConsent: {
+        prompt("""
+        slop can use OpenAI (\(openAIModel())) instead of the on-device model.
+        This sends your command and the current directory's file listing to OpenAI.
+        Use OpenAI by default from now on? [y/N] \
+
+        """)
+        let answer = readLine(strippingNewline: true)?.lowercased() ?? ""
+        let c: Consent = (answer == "y" || answer == "yes") ? .granted : .declined
+        storeConsent(c)   // persist the default (only here)
+        return c
+    }
+)
+
 do {
-    let result = try await interpret(input: input)
+    let result = try await interpret(input: input, backend: backend)
 
     func runIt() {
         switch execute(result.command, shell: shell) {
