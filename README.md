@@ -2,12 +2,22 @@
 
 > **Sloppy. Crappy unix commands that work.**
 
-Type a rough command or plain English; `slop` uses Apple's on-device Foundation
-Models to produce the right shell command, then runs it (when safe and
-confident) or shows it for confirmation.
+Can't remember the damn command? Git's got your tongue? Just get sloppy. `slop`
+works with all your half-assed attempts at unix, and if it's all too much, just
+revert to English. Or any other language, for that matter.
 
-100% on-device. No API keys, no network, private. Requires macOS 26+,
-Apple Silicon, Apple Intelligence enabled.
+You type the gist; `slop` figures out what you meant, fixes it up, and runs it.
+It uses Apple's on-device model, so your fumbling stays on your machine:
+
+    slop cp *.m dir/                  # half-remembered command; it repairs it
+    slop copy the m files into dir    # ...or just say it in English
+    slop cd to the lip reading project
+
+Safe stuff just runs. Anything that could bite (delete, overwrite, `sudo`)
+stops and shows you the command plus a plain-English description first.
+
+100% on-device. No API keys, no network, nothing leaves your Mac. Requires
+macOS 26+, Apple Silicon, and Apple Intelligence enabled.
 
 ## Install
 
@@ -31,20 +41,16 @@ Builds the release binary, installs `slop-bin` to `~/.local/bin`, and adds a
 
 ## Use
 
-    slop list files here
-    slop cp *.m dir/
-    slop cd into the src folder
-
-Safe + confident commands run immediately (echoed dim first, e.g. `$ ls`).
-Destructive or uncertain ones are shown with a plain-English description and
-wait for `[Y/n/e]`:
+When `slop` runs a command outright, it echoes it dim first (e.g. `$ ls`) so
+you see what happened. When it's unsure — or the command could bite — it shows
+you the command and a plain-English description and waits at `[Y/n/e]`:
 
 - **Y** / Enter — run it
 - **n** — cancel
 - **e** — edit the command, then run what you save
 
 Anything that deletes, overwrites, moves, force-pushes, or needs `sudo` always
-proposes — it is never auto-run.
+proposes — it is never auto-run, no matter how confident it is.
 
 ### Quoting
 
