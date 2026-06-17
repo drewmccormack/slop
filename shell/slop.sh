@@ -19,10 +19,15 @@ _slop() {
     return $rc
 }
 
+# Define the `slop` entry point as an alias in both shells. Using an alias
+# (rather than a `slop()` function in the else-branch) avoids a zsh parse error:
+# zsh parses the whole file at source time, and a literal `slop() { ... }` would
+# collide with the alias defined above it.
 if [ -n "$ZSH_VERSION" ]; then
+    # zsh: noglob at the call site preserves unquoted globs (e.g. slop cp *.m d/).
     alias slop='noglob _slop'
 else
-    # bash (and other shells): no call-site noglob available; quote globbed
-    # commands. _slop is the entry point.
-    slop() { _slop "$@"; }
+    # bash and other shells: no call-site noglob, so quote commands containing
+    # globs/pipes/redirects (e.g. slop 'cp *.m d/').
+    alias slop='_slop'
 fi
