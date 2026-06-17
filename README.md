@@ -2,7 +2,7 @@
 
 > **AI slop comes to the command line.**
 >
-> History's first machine-generated mush that fixes the mush you generated first.
+> An AI command that fixes your human-generated slop.
 
 It was always going to end up in the terminal. AI slop took the art, then the
 prose, then the corporate apology for the last batch of AI slop, and the shell
