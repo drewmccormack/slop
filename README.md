@@ -7,7 +7,8 @@ works with all your half-assed attempts at unix, and if it's all too much, just
 revert to English. Or any other language, for that matter.
 
 You type the gist; `slop` figures out what you meant, fixes it up, and runs it.
-It uses Apple's on-device model, so your fumbling stays on your machine:
+It uses Apple's on-device model, so your fumbling stays completely private. Your
+colleagues will never see that you can't awk your way out of a paper bag:
 
     slop cp *.m dir/                  # half-remembered command; it repairs it
     slop copy the m files into dir    # ...or just say it in English
