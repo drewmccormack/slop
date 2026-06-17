@@ -15,13 +15,13 @@ final class WrapperFileTests: XCTestCase {
 
     func testWrapperHandlesEvalSentinel() throws {
         let src = try wrapperSource()
-        XCTAssertTrue(src.contains("__SLOP_EVAL__"))
+        XCTAssertTrue(src.contains("SLOP_EVAL_FILE"))
         XCTAssertTrue(src.contains("eval"))
     }
     func testWrapperDisablesGlobbing() throws {
         let src = try wrapperSource()
-        // Must neutralise globbing one way or another for unquoted globs to survive.
-        XCTAssertTrue(src.contains("noglob") || src.contains("set -f"))
+        // zsh path: noglob alias at the call site preserves unquoted globs.
+        XCTAssertTrue(src.contains("noglob"))
     }
     func testWrapperCallsBinaryNotItself() throws {
         let src = try wrapperSource()

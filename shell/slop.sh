@@ -1,30 +1,28 @@
 # slop shell wrapper — source this from .zshrc / .bashrc
-# Provides the `slop` function: preserves unquoted globs, and evals cd/export
-# in the current shell when the binary requests it via the __SLOP_EVAL__ sentinel.
+# Provides `slop`. Real command output streams straight to your terminal.
+# cd/export are written by the binary to a temp file (SLOP_EVAL_FILE) which we
+# eval in the current shell, so they affect your live session.
+#
+# Unquoted globs: in zsh the `slop` alias applies `noglob` at the call site, so
+# `slop cp *.m dir/` reaches the binary with `*.m` intact. bash has no call-site
+# noglob, so in bash quote commands that contain globs/pipes/redirects.
 
-slop() {
-    local out rc
-    # Disable globbing so unquoted patterns like *.m reach the binary intact.
-    if [ -n "$ZSH_VERSION" ]; then
-        out="$(noglob slop-bin "$@")"
-        rc=$?
-    else
-        set -f
-        out="$(slop-bin "$@")"
-        rc=$?
-        set +f
+_slop() {
+    local evalfile rc
+    evalfile="$(mktemp "${TMPDIR:-/tmp}/slop-eval.XXXXXX")"
+    SLOP_EVAL_FILE="$evalfile" slop-bin "$@"
+    rc=$?
+    if [ -s "$evalfile" ]; then
+        eval "$(cat "$evalfile")"
     fi
-
-    case "$out" in
-        __SLOP_EVAL__\ *)
-            eval "${out#__SLOP_EVAL__ }"
-            ;;
-        "")
-            : # nothing on stdout (command ran with its own output going to the tty)
-            ;;
-        *)
-            printf '%s\n' "$out"
-            ;;
-    esac
+    rm -f "$evalfile"
     return $rc
 }
+
+if [ -n "$ZSH_VERSION" ]; then
+    alias slop='noglob _slop'
+else
+    # bash (and other shells): no call-site noglob available; quote globbed
+    # commands. _slop is the entry point.
+    slop() { _slop "$@"; }
+fi

@@ -41,34 +41,35 @@ pipe, redirect, or `&&`, quote it — that always works:
 This is because the shell parses pipes and redirects as grammar before `slop`
 ever sees them; quoting passes the whole line through verbatim.
 
-### Glob behavior on this machine (verified)
+### Glob behavior
 
-Unquoted globs **survive** to `slop` in both **zsh** (via `noglob`) and **bash**
-(via `set -f`) — verified: `slop cp *.m dir/` reaches the binary as the literal
-`cp *.m dir/`, not pre-expanded filenames. Pipes and redirects still require
-quoting (see above).
+- **zsh**: unquoted globs survive — the `slop` alias applies `noglob` at the
+  call site, so `slop cp *.m dir/` reaches the binary with `*.m` intact.
+- **bash**: unquoted globs are expanded by bash before slop runs; **quote**
+  commands containing globs in bash, e.g. `slop 'cp *.m dir/'`.
+- **Both shells**: pipes and redirects always require quoting (see above).
 
-`cd` and `export` take effect in your live shell: the binary emits the command
-back through a `__SLOP_EVAL__` sentinel and the shell wrapper `eval`s it in the
+`cd` and `export` take effect in your live shell: the binary writes the command
+to a temp file (`SLOP_EVAL_FILE`) and the shell wrapper `eval`s it in the
 current session. Verified working in both zsh and bash. (Because model output
 is non-deterministic, a borderline `cd` request is occasionally proposed rather
 than auto-run; just press Enter to confirm.)
 
 ## How it works
 
-1. The shell wrapper (`shell/slop.sh`) disables globbing for the call and runs
-   `slop-bin`, capturing stdout.
+1. The shell wrapper (`shell/slop.sh`) runs `slop-bin` with stdin/stdout/stderr
+   all going straight to the terminal — nothing is captured.
 2. `slop-bin` checks the on-device model is available, then asks it to either
    repair a sloppy command or translate English, returning a structured result:
    `{ command, explanation, confidence, isDestructive }`.
 3. A pure decision rule picks the action: **run** iff `confidence == high && !isDestructive`,
    otherwise **propose**.
 4. Non-`cd`/`export` commands run via `$SHELL -c` with output streamed straight
-   to your terminal. `cd`/`export` are emitted via the `__SLOP_EVAL__` sentinel
-   for the wrapper to `eval` in your live shell.
+   to your terminal. `cd`/`export` are written to a temp file (`SLOP_EVAL_FILE`)
+   which the wrapper `eval`s in your live shell. When run standalone (no wrapper),
+   the binary falls back to a `__SLOP_EVAL__` sentinel on stdout.
 
-All prompts and echoes go to stderr; stdout carries only the sentinel (or
-nothing), so the wrapper can parse it cleanly.
+All prompts and echoes go to stderr.
 
 ## Development
 

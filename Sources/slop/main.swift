@@ -13,6 +13,18 @@ func prompt(_ s: String) {
     FileHandle.standardError.write(Data(s.utf8))
 }
 
+// When run under the shell wrapper, SLOP_EVAL_FILE points at a temp file the
+// wrapper will source/eval in the live shell. Writing the cd/export command
+// there (instead of stdout) keeps real command output uncaptured and streaming
+// straight to the terminal. Falls back to a stdout sentinel when run standalone.
+func emitEval(_ command: String) {
+    if let path = ProcessInfo.processInfo.environment["SLOP_EVAL_FILE"], !path.isEmpty {
+        try? Data(command.utf8).write(to: URL(fileURLWithPath: path))
+    } else {
+        print("__SLOP_EVAL__ \(command)")
+    }
+}
+
 do {
     let result = try await interpret(input: input)
 
@@ -21,8 +33,7 @@ do {
         case .ran(let code):
             exit(code)
         case .emitForEval(let cmd):
-            // Wrapper detects this sentinel line on stdout and evals the command.
-            print("__SLOP_EVAL__ \(cmd)")
+            emitEval(cmd)
             exit(0)
         }
     }
@@ -45,7 +56,7 @@ do {
             let final = edited.isEmpty ? result.command : edited
             switch execute(final, shell: shell) {
             case .ran(let code): exit(code)
-            case .emitForEval(let cmd): print("__SLOP_EVAL__ \(cmd)"); exit(0)
+            case .emitForEval(let cmd): emitEval(cmd); exit(0)
             }
         default:
             prompt("cancelled\n")
