@@ -38,6 +38,32 @@ do {
         }
     }
 
+    // --json: emit the raw structured result for scripting/testing. Never runs.
+    if options.json {
+        let wouldRun = decide(result, alwaysPrompt: options.alwaysPrompt) == .run
+        let conf: String
+        switch result.confidence {
+        case .high: conf = "high"
+        case .medium: conf = "medium"
+        case .low: conf = "low"
+        }
+        func esc(_ s: String) -> String {
+            var out = ""
+            for ch in s {
+                switch ch {
+                case "\\": out += "\\\\"
+                case "\"": out += "\\\""
+                case "\n": out += "\\n"
+                case "\t": out += "\\t"
+                default: out.append(ch)
+                }
+            }
+            return out
+        }
+        print("{\"command\":\"\(esc(result.command))\",\"explanation\":\"\(esc(result.explanation))\",\"confidence\":\"\(conf)\",\"isDestructive\":\(result.isDestructive),\"dangerous\":\(isDangerousCommand(result.command)),\"wouldRun\":\(wouldRun)}")
+        exit(0)
+    }
+
     // --dry-run: show what slop resolved (command, explanation, and why it would
     // run or pause) and exit without touching anything.
     if options.dryRun {

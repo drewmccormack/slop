@@ -5,6 +5,7 @@
 struct Options: Equatable {
     var dryRun = false      // resolve + print the command and verdict; never execute
     var alwaysPrompt = false // force the [Y/n/e] confirmation even for safe commands
+    var json = false        // emit the raw structured result as JSON; implies dry-run
     var input = ""          // the remaining words, joined — the user's request
 }
 
@@ -23,6 +24,10 @@ func parseOptions(_ args: [String]) -> Options {
             rest = rest.dropFirst()
         case "--prompt", "-i":
             opts.alwaysPrompt = true
+            rest = rest.dropFirst()
+        case "--json":
+            opts.json = true
+            opts.dryRun = true   // json never executes
             rest = rest.dropFirst()
         case "--":
             rest = rest.dropFirst()

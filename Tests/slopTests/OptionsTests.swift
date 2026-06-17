@@ -47,6 +47,13 @@ final class OptionsTests: XCTestCase {
         XCTAssertEqual(o.input, "--prompt is literal")
     }
 
+    func testJsonImpliesDryRun() {
+        let o = parseOptions(["--json", "ls"])
+        XCTAssertTrue(o.json)
+        XCTAssertTrue(o.dryRun)   // json never executes
+        XCTAssertEqual(o.input, "ls")
+    }
+
     func testEmpty() {
         let o = parseOptions([])
         XCTAssertEqual(o.input, "")
