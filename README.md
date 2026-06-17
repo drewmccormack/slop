@@ -1,8 +1,10 @@
 # slop
 
-Sloppy shell, on-device. Type a rough command or plain English; `slop` uses
-Apple's on-device Foundation Models to produce the right shell command, then
-runs it (when safe and confident) or shows it for confirmation.
+> **Sloppy. Crappy unix commands that work.**
+
+Type a rough command or plain English; `slop` uses Apple's on-device Foundation
+Models to produce the right shell command, then runs it (when safe and
+confident) or shows it for confirmation.
 
 100% on-device. No API keys, no network, private. Requires macOS 26+,
 Apple Silicon, Apple Intelligence enabled.
