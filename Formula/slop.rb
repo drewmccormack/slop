@@ -10,8 +10,22 @@ class Slop < Formula
   depends_on arch: :arm64  # Apple Silicon only
   depends_on macos: :tahoe # macOS 26+: requires Apple FoundationModels
 
+
   def install
-    system "swift", "build", "-c", "release", "--disable-sandbox"
+    # This machine may have a beta Xcode selected and a mismatched Command Line
+    # Tools SDK; pin the build to the released Xcode so the toolchain and SDK
+    # agree (otherwise the FoundationModels macro plugin + Darwin modules clash).
+    developer_dir = "/Applications/Xcode.app/Contents/Developer"
+    swift = "#{developer_dir}/Toolchains/XcodeDefault.xctoolchain/usr/bin/swift"
+    if File.executable?(swift)
+      # Use the released Xcode toolchain's swift directly (bypassing Homebrew's
+      # compiler shim, which breaks the FoundationModels Swift-macro plugin), and
+      # pin DEVELOPER_DIR so the SDK matches the toolchain.
+      system "env", "DEVELOPER_DIR=#{developer_dir}", swift,
+             "build", "-c", "release", "--disable-sandbox"
+    else
+      system "swift", "build", "-c", "release", "--disable-sandbox"
+    end
 
     # The compiled product is named `slop`; install it as `slop-bin` because the
     # user-facing `slop` is a shell alias (it needs call-site `noglob` in zsh,
