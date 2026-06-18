@@ -4,31 +4,28 @@
 >
 > Let AI help with your crappy grasp of UNIX.
 
-Can't remember the arguments to that damned command again? Git got your tongue? Just get sloppy, and let on-device AI sort it out.
+Can't remember the arguments to that damned command again? Git got your tongue? Just get sloppy, and let AI sort it out.
 
 Don't get down — get even. Pass your human-generated slop in and let AI sort it out. With this one tool, you'll be a command-line legend!
 
-`slop` is an on-device language model wedged between you and your shell. You hand
-it a half-assed command you sorta/kinda remember, or you give up completely and just go with prose. Apple Intelligence mulls it over, and offers to run what it thinks you meant.
+`slop` is a language model wedged between you and your shell. You hand
+it a half-assed command you sorta/kinda remember, or you give up completely and just go with prose. It mulls it over, and offers to run what it thinks you meant.
 
     slop cp *.m My Documents/          # almost right
     slop copy the m files into dir     # I give up
     slop cd to the lip reading project # I can't even be bothered finding the damn dir
 	slop rm -rf ~/*				       # Sure about that?
 
-It runs entirely on Apple's on-device model, which means none of this reaches the
-network, your employer, or the permanent record. Whatever you cannot remember
-about `tar` stays between you and a deep neural net that has no
-opinions and no memory.
-
 Most stuff just runs immediately. Anything that could ruin your afternoon — `rm`, an
 overwrite, `sudo` — stops, shows you the command and a sentence
 of plain English, and waits for you to agree to it. The slop has standards. They're low
 standards, but it has them.
 
-Entirely on-device. No API keys, no network, no telemetry, no modal explaining
-how much it values your privacy. Nothing leaves your Mac that wasn't going to
-leave anyway. Requires macOS 26+, Apple Silicon, and Apple Intelligence turned on.
+It really wants OpenAI for a brain. Set `OPENAI_API_KEY` and it uses that; the
+results go from "amusing" to "actually correct." There's an on-device fallback
+(Apple's model, no key, nothing leaves your Mac) for when you have no key or no
+signal, but it's a 3B model that struggles with anything beyond the obvious — fine
+in a pinch, not the main event. See [Picking a brain](#picking-a-brain).
 
 ## Get slop into your machine
 
@@ -74,6 +71,28 @@ Two flags for the nervous:
 - `--prompt` / `-i` — make it ask `[Y/n/e]` for *everything*, even the commands
   it would otherwise be sure about.
 
+## Picking a brain
+
+There are two backends, and they are not equals.
+
+**OpenAI (the one you want).** Set `OPENAI_API_KEY` in your environment and slop
+will offer to use it. The first time, it tells you what that means — your command
+and the current directory's file listing get sent to OpenAI — and asks whether to
+make it the default. Your answer is remembered in `~/.config/slop/consent`. This
+is the version that actually produces correct, idiomatic commands. Override the
+model with `SLOP_OPENAI_MODEL` (defaults to `gpt-5.5`).
+
+**On-device (the fallback).** With no key — or no internet — slop uses Apple's
+on-device model. Nothing leaves your Mac, which is lovely, but it's a small model
+and it shows: it handles the obvious cases and flails at anything that needs real
+composition. Treat it as the offline spare tyre. Requires macOS 26+, Apple
+Silicon, and Apple Intelligence turned on.
+
+Force one for a single command, without changing your default:
+
+- `--llm=openai` — use OpenAI this once.
+- `--llm=apple` — use the on-device model this once.
+
 ### When to use quotes (a brief, grudging dose of reality)
 
 The slop is powerful but it is not a wizard, and your shell gets first crack at
@@ -106,9 +125,10 @@ For the morbidly curious who want to know what's running their `rm`:
 
 1. The shell wrapper (`shell/slop.sh`) runs `slop-bin` with stdin/stdout/stderr
    going straight to your terminal. Nothing is captured, nothing is hidden.
-2. `slop-bin` confirms the on-device model is awake, then hands it your input and
-   asks it to either repair a sloppy command or translate your English, returning
-   a tidy little verdict: `{ command, explanation, confidence, isDestructive }`.
+2. `slop-bin` picks a model (OpenAI if you have a key and said yes, otherwise the
+   on-device one), then hands it your input and asks it to either repair a sloppy
+   command or translate your English, returning a tidy little verdict:
+   `{ command, explanation, confidence, isDestructive }`.
 3. A dumb, honest rule decides what happens: **run** only if `confidence == high && !isDestructive`
    *and* a deterministic danger gate finds nothing alarming in the command;
    otherwise **propose** and let you be the adult. The gate is the part that
